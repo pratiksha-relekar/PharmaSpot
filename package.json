@@ -66,6 +66,26 @@
     "@octokit/request": "^8.4.1",
     "@octokit/request-error": "^5.1.1"
   },
+  "resolutions": {
+    "immutable": "3.8.3",
+    "socket.io-parser": "^4.2.6",
+    "tar": "^7.5.11",
+    "glob": "^10.5.0",
+    "node-abi": "^4.28.0",
+    "@xmldom/xmldom": "^0.8.12",
+    "terser": "^5.39.2",
+    "@tootallnate/once": "^3.0.1",
+    "@octokit/plugin-paginate-rest": "^9.2.2",
+    "@octokit/request": "^8.4.1",
+    "@octokit/request-error": "^5.1.1",
+    "brace-expansion": "^2.0.2",
+    "dompurify": "^3.3.4",
+    "follow-redirects": "^1.15.11",
+    "lodash": "^4.17.24",
+    "multer": "^2.1.1",
+    "picomatch": "^2.3.2",
+    "electron": "^41.2.2"
+  },
   "scripts": {
     "electron": "cross-env NODE_ENV=dev nodemon --exec \"\"electron .\"\"",
     "electron-build": "electron-builder",
