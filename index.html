@@ -203,6 +203,7 @@
                                             </select>
                                             <span class="input-group-btn">
                                                 <button id="newCustomerModal" data-toggle="modal" data-target="#newCustomer" class="btn btn-success"><i class="fa fa-plus"></i></button>
+                                                <button id="editCustomerModal" class="btn btn-warning"><i class="fa fa-pencil"></i></button>
                                             </span>
                                         </div>
                                     </div>
@@ -469,11 +470,12 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                        <h4 class="modal-title" id="mySmallModalLabel">New Customer
+                        <h4 class="modal-title" id="customerModalTitle">New Customer
                         </h4>
                     </div>
                     <div class="modal-body">
                         <form id="saveCustomer" data-parsley-validate>
+                            <input type="hidden" id="customer_id" name="_id">
                             <div class="form-group">
                                 <label for="userName">Customer Name*</label>
                                 <input type="text" required="required" name="name" parsley-trigger="change" placeholder="Enter name" class="form-control" id="userName">
@@ -490,7 +492,7 @@
                                 <label for="userName">Customer Address</label>
                                 <input type="text" name="address" parsley-trigger="change" placeholder="Enter address" class="form-control" id="userAddress">
                             </div>
-                            <input type="submit" class="btn btn-primary btn-block waves-effect waves-light">
+                            <input id="saveCustomerBtn" type="submit" value="Save Customer" class="btn btn-primary btn-block waves-effect waves-light">
                         </form>
                     </div>
                 </div>

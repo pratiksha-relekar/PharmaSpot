@@ -372,8 +372,15 @@ if (auth == undefined) {
         );
 
         customers.forEach((cust) => {
-          let customer = `<option value='{"id": ${cust._id}, "name": "${cust.name}"}'>${cust.name}</option>`;
-          $("#customer").append(customer);
+          $("#customer").append(
+            $("<option>", {
+              value: JSON.stringify({
+                id: cust._id,
+                name: cust.name,
+              }),
+              text: cust.name,
+            }),
+          );
         });
       });
     }
@@ -1002,6 +1009,12 @@ if (auth == undefined) {
                   onclick:
                     "$(this).orderDetails(" + index + "," + orderType + ")",
                 }).append($("<span>", { class: "fa fa-shopping-basket" })),
+
+                $("<button>", {
+                  class: "btn btn-success",
+                  title: "Mark as paid",
+                  onclick: "$(this).payOrder(" + index + "," + orderType + ")",
+                }).append($("<span>", { class: "fa fa-money" })),
               ),
             ),
           ),
@@ -1110,6 +1123,11 @@ if (auth == undefined) {
       $("#customerModal").modal("hide");
     };
 
+    $.fn.payOrder = function (index, orderType) {
+      $(this).orderDetails(index, orderType);
+      $("#paymentModel").modal("show");
+    };
+
     $.fn.deleteOrder = function (index, type) {
       switch (type) {
         case 1:
@@ -1172,20 +1190,77 @@ if (auth == undefined) {
       });
     };
 
+    function getSelectedCustomerData() {
+      const selected = $("#customer").val();
+      if (!selected || selected == 0) {
+        return null;
+      }
+
+      try {
+        return JSON.parse(selected);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    $("#newCustomerModal").on("click", function () {
+      $("#saveCustomer").get(0).reset();
+      $("#customer_id").val("");
+      $("#customerModalTitle").text("New Customer");
+      $("#saveCustomerBtn").val("Save Customer");
+    });
+
+    $("#editCustomerModal").on("click", function () {
+      const selectedCustomer = getSelectedCustomerData();
+
+      if (!selectedCustomer || !selectedCustomer.id) {
+        notiflix.Report.warning(
+          "Customer required",
+          "Please select a customer to edit.",
+          "Ok",
+        );
+        return;
+      }
+
+      $.get(api + "customers/customer/" + selectedCustomer.id, function (customer) {
+        if (!customer) {
+          notiflix.Report.warning(
+            "Not found",
+            "Could not load selected customer details.",
+            "Ok",
+          );
+          return;
+        }
+
+        $("#customer_id").val(customer._id);
+        $("#userName").val(customer.name || "");
+        $("#phoneNumber").val(customer.phone || "");
+        $("#emailAddress").val(customer.email || "");
+        $("#userAddress").val(customer.address || "");
+        $("#customerModalTitle").text("Edit Customer");
+        $("#saveCustomerBtn").val("Update Customer");
+        $("#newCustomer").modal("show");
+      });
+    });
+
     $("#saveCustomer").on("submit", function (e) {
       e.preventDefault();
 
+      const customerId = $("#customer_id").val();
       let custData = {
-        _id: Math.floor(Date.now() / 1000),
+        _id: customerId != "" ? parseInt(customerId) : Math.floor(Date.now() / 1000),
         name: $("#userName").val(),
         phone: $("#phoneNumber").val(),
         email: $("#emailAddress").val(),
         address: $("#userAddress").val(),
       };
 
+      const requestType = customerId != "" ? "PUT" : "POST";
+      const successMessage = customerId != "" ? "Customer updated successfully!" : "Customer added successfully!";
+
       $.ajax({
         url: api + "customers/customer",
-        type: "POST",
+        type: requestType,
         data: JSON.stringify(custData),
         contentType: "application/json; charset=utf-8",
         cache: false,
@@ -1193,22 +1268,22 @@ if (auth == undefined) {
         success: function (data) {
           $("#newCustomer").modal("hide");
           notiflix.Report.success(
-            "Customer added!",
-            "Customer added successfully!",
+            "Success",
+            successMessage,
             "Ok",
           );
-          $("#customer option:selected").removeAttr("selected");
-          $("#customer").append(
-            $("<option>", {
-              text: custData.name,
-              value: `{"id": ${custData._id}, "name": ${custData.name}}`,
-              selected: "selected",
-            }),
-          );
+          loadCustomers();
 
-          $("#customer")
-            .val(`{"id": ${custData._id}, "name": ${custData.name}}`)
-            .trigger("chosen:updated");
+          setTimeout(function () {
+            $("#customer")
+              .val(
+                JSON.stringify({
+                  id: custData._id,
+                  name: custData.name,
+                }),
+              )
+              .trigger("chosen:updated");
+          }, 100);
         },
         error: function (data) {
           $("#newCustomer").modal("hide");
