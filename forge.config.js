@@ -2,7 +2,6 @@ const fs = require('fs');
 const path = require('path');
 const glob = require('glob');
 const pkg = require("./package.json");
-const skipLinuxNativeMakersInCi = process.env.GITHUB_ACTIONS === 'true' && process.platform === 'linux';
 
 module.exports = {
   packagerConfig: {
@@ -29,12 +28,8 @@ module.exports = {
   // { name: '@electron-forge/maker-appx', config: {} },
 
   // Linux
-  ...(!skipLinuxNativeMakersInCi
-    ? [
-        { name: '@electron-forge/maker-deb', config: {} },
-        { name: '@electron-forge/maker-rpm', config: {} },
-      ]
-    : []),
+  { name: '@electron-forge/maker-deb', config: {} },
+  { name: '@electron-forge/maker-rpm', config: {} },
   // { name: '@electron-forge/maker-snap', config: {} },
 
   // macOS
