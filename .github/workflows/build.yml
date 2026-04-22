@@ -39,6 +39,10 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y fakeroot rpm
+
+      - name: Install Linux Forge maker backends
+        if: matrix.os == 'ubuntu-latest'
+        run: npm install --no-save electron-installer-debian@^3.2.0 electron-installer-redhat@^3.4.0
           
 
       - name: Build installers
