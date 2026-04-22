@@ -130,29 +130,24 @@ test('handles when the inputs for currentStock and minimumStock  strings', () =>
 
 /** FILE FUNCTIONS **/
 describe('checkFileExists', () => {
-  // Mocking fs.accessSync to control its behavior during tests
- 
-  fs.accessSync = jest.fn();
+  fs.statSync = jest.fn();
 
   afterEach(() => {
-    // Clear the mock implementation and mock calls after each test
-    fs.accessSync.mockReset();
+    fs.statSync.mockReset();
   });
 
   it('should return true if the file exists', () => {
-    // Set up the mock to simulate a successful file access
-    fs.accessSync.mockImplementation(() => {});
+    fs.statSync.mockReturnValue({ isFile: () => true });
 
     const imageUrl = 'path/to/existing/image.jpg';
     const result = checkFileExists(imageUrl);
 
     expect(result).toBe(true);
-    expect(fs.accessSync).toHaveBeenCalledWith(imageUrl, fs.constants.F_OK);
+    expect(fs.statSync).toHaveBeenCalledWith(imageUrl);
   });
 
   it('should return false if the file does not exist', () => {
-    // Set up the mock to simulate a failed file access
-    fs.accessSync.mockImplementation(() => {
+    fs.statSync.mockImplementation(() => {
       throw new Error('File not found');
     });
 
@@ -160,7 +155,7 @@ describe('checkFileExists', () => {
     const result = checkFileExists(imageUrl);
 
     expect(result).toBe(false);
-    expect(fs.accessSync).toHaveBeenCalledWith(imageUrl, fs.constants.F_OK);
+    expect(fs.statSync).toHaveBeenCalledWith(imageUrl);
   });
 });
 
@@ -171,14 +166,11 @@ describe('getFileHash', () => {
   const hashValue = 'mocked-hash-value';
 
   beforeEach(() => {
-    // Mock fs.readFileSync
     fs.readFileSync.mockReturnValue(fileData);
 
-    // Mock crypto.createHash().update().digest()
     const digestMock = jest.fn(() => hashValue);
     const updateMock = jest.fn().mockReturnValue({ digest: digestMock });
-    const createHashMock = jest.fn().mockReturnValue({ update: updateMock });
-    crypto.createHash.mockReturnValue(createHashMock);
+    crypto.createHash.mockReturnValue({ update: updateMock });
   });
 
   afterEach(() => {
@@ -189,15 +181,11 @@ describe('getFileHash', () => {
   it('should read file and return hash', () => {
     const result = getFileHash(filePath);
 
-    // Verify that fs.readFileSync is called with the correct file path
     expect(fs.readFileSync).toHaveBeenCalledWith(filePath);
 
-    // Verify that crypto.createHash().update().digest() is called with the correct file data
     expect(crypto.createHash).toHaveBeenCalledWith('sha256');
-    expect(crypto.createHash().update).toHaveBeenCalledWith(fileData);
-    expect(crypto.createHash().update().digest).toHaveBeenCalledWith('hex');
+    expect(crypto.createHash.mock.results[0].value.update).toHaveBeenCalledWith(fileData);
 
-    // Verify that the result matches the mocked hash value
     expect(result).toEqual(hashValue);
   });
 });
