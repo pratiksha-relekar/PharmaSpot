@@ -34,19 +34,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Linux packaging dependencies
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y fakeroot rpm
-
-      - name: Install Linux Forge maker backends
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          npm install --save-dev --package-lock=false electron-installer-debian@^3.2.0 electron-installer-redhat@^3.4.0
-          node -e "console.log(require.resolve('electron-installer-debian')); console.log(require.resolve('electron-installer-redhat'));"
-          
-
       - name: Build installers
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
