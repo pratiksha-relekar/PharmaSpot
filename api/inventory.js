@@ -50,6 +50,24 @@ let inventoryDB = new Datastore({
 
 inventoryDB.ensureIndex({ fieldName: "_id", unique: true });
 
+function generateUniqueProductId(callback) {
+    let candidateId = Number(`${Date.now()}${Math.floor(Math.random() * 1000).toString().padStart(3, "0")}`);
+
+    inventoryDB.findOne({ _id: candidateId }, function (err, existingProduct) {
+        if (err) {
+            callback(err);
+            return;
+        }
+
+        if (existingProduct) {
+            generateUniqueProductId(callback);
+            return;
+        }
+
+        callback(null, candidateId);
+    });
+}
+
 /**
  * GET endpoint: Get the welcome message for the Inventory API.
  *
@@ -163,6 +181,7 @@ app.post("/product", function (req, res) {
         expirationDate: validator.escape(req.body.expirationDate),
         price: validator.escape(req.body.price),
         category: validator.escape(req.body.category),
+        supplier: validator.escape(req.body.supplier || ""),
         quantity:
             validator.escape(req.body.quantity) == ""
                 ? 0
@@ -174,17 +193,28 @@ app.post("/product", function (req, res) {
     };
 
     if (validator.escape(req.body.id) === "") {
-        Product._id = Math.floor(Date.now() / 1000);
-        inventoryDB.insert(Product, function (err, product) {
-            if (err) {
-                console.error(err);
+        generateUniqueProductId(function (idErr, productId) {
+            if (idErr) {
+                console.error(idErr);
                 res.status(500).json({
                     error: "Internal Server Error",
                     message: "An unexpected error occurred.",
                 });
-            } else {
-                res.sendStatus(200);
+                return;
             }
+
+            Product._id = productId;
+            inventoryDB.insert(Product, function (err, product) {
+                if (err) {
+                    console.error(err);
+                    res.status(500).json({
+                        error: "Internal Server Error",
+                        message: "An unexpected error occurred.",
+                    });
+                } else {
+                    res.sendStatus(200);
+                }
+            });
         });
     } else {
         inventoryDB.update(

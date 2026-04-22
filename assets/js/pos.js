@@ -43,7 +43,7 @@ let transaction_index;
 const appName = process.env.APPNAME;
 const appData = process.env.APPDATA;
 let host = "localhost";
-let port = process.env.PORT;
+let port = process.env.PORT || "3210";
 let img_path = path.join(appData, appName, "uploads", "/");
 let api = "http://" + host + ":" + port + "/api/";
 const bcrypt = require("bcrypt");
@@ -197,7 +197,8 @@ if (auth == undefined) {
 
   if (platform != undefined) {
     if (platform.app == "Network Point of Sale Terminal") {
-      api = "http://" + platform.ip + ":" + port + "/api/";
+      const remotePort = platform.port || port;
+      api = "http://" + platform.ip + ":" + remotePort + "/api/";
       perms = true;
     }
   }
@@ -1452,6 +1453,7 @@ if (auth == undefined) {
       $("#productName").val(allProducts[index].name);
       $("#product_price").val(allProducts[index].price);
       $("#quantity").val(allProducts[index].quantity);
+      $("#supplier").val(allProducts[index].supplier || "");
       $("#barcode").val(allProducts[index].barcode || allProducts[index]._id);
       $("#expirationDate").val(allProducts[index].expirationDate);
       $("#minStock").val(allProducts[index].minStock || 1);
@@ -1737,6 +1739,7 @@ if (auth == undefined) {
             </td>
             <td>${product.expirationDate}</td>
             <td>${category.length > 0 ? category[0].name : ""}</td>
+            <td>${product.supplier || ""}</td>
             <td class="nobr"><span class="btn-group"><button onClick="$(this).editProduct(${index})" class="btn btn-warning btn-sm"><i class="fa fa-edit"></i></button><button onClick="$(this).deleteProduct(${
               product._id
             })" class="btn btn-danger btn-sm"><i class="fa fa-trash"></i></button></span></td></tr>`;
@@ -1895,6 +1898,7 @@ if (auth == undefined) {
       } else {
         if (isNumeric(formData.till)) {
           formData["app"] = $("#app").find("option:selected").text();
+          formData["port"] = port;
           storage.set("settings", formData);
           ipcRenderer.send("app-reload", "");
         } else {
@@ -2001,6 +2005,9 @@ if (auth == undefined) {
 
         $("#ip").val(platform.ip);
         $("#till").val(platform.till);
+        if (platform.port) {
+          port = platform.port;
+        }
 
         macaddress.one(function (err, mac) {
           $("#mac").val(mac);

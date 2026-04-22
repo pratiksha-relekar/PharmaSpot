@@ -7,7 +7,7 @@ const pkg = require("./package.json");
 const {app} = require('electron');
 process.env.APPDATA = app.getPath('appData');
 process.env.APPNAME = pkg.name;
-const PORT = process.env.PORT || 0;
+const PORT = Number(process.env.PORT || 3210);
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 100, // 100 requests per window
