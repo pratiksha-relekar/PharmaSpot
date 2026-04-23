@@ -47,7 +47,7 @@ PharmaSpot is a cross-platform Point of Sale system designed for pharmacies and 
 
 ## Demo
 
-[PharmaSpot Video Preview](https://github.com/drkNsubuga/PharmaSpot/assets/12871099/14e32721-b5d6-4186-bb63-be59733862c3)
+https://github.com/user-attachments/assets/9b066b96-f06c-4b37-8211-58fd1fea5f01
 
 | **Point of Sale** |  **Payment Point** |
 |--|--|
